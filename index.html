@@ -1,1 +1,977 @@
-
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Christmas Starry Night 🎄</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  overflow:hidden;
+  background:#030d27;
+  font-family:Georgia,serif;
+  color:white;
+}
+canvas{display:block;touch-action:none}
+.header{
+  position:absolute;
+  top:7%;
+  width:100%;
+  text-align:center;
+  pointer-events:none;
+  z-index:5;
+  opacity:0;
+  animation:fade 2s .5s forwards;
+}
+.header h1{
+  font-size:clamp(27px,6vw,46px);
+  font-weight:normal;
+  letter-spacing:7px;
+  color:#ffe8ad;
+  text-shadow:0 0 18px #f9cf70,0 0 40px #c68a32;
+}
+.header p{
+  margin-top:13px;
+  font-size:11px;
+  letter-spacing:5px;
+  color:#b9d8ff;
+}
+#hint{
+  position:absolute;
+  bottom:10%;
+  width:100%;
+  text-align:center;
+  font-size:11px;
+  letter-spacing:2px;
+  line-height:2.5;
+  color:#e2d7b9;
+  pointer-events:none;
+  z-index:5;
+  opacity:0;
+  transition:opacity 2s;
+}
+#footer{
+  position:absolute;
+  bottom:4%;
+  width:100%;
+  text-align:center;
+  font-size:10px;
+  letter-spacing:4px;
+  color:#a9c6ec;
+  pointer-events:none;
+  z-index:5;
+  opacity:0;
+  transition:opacity 2s;
+}
+#replay{
+  position:absolute;
+  right:15px;
+  bottom:17%;
+  z-index:6;
+  padding:9px 14px;
+  border:1px solid #b9c9e5;
+  background:#102342bb;
+  color:#ffe5a5;
+  border-radius:30px;
+  font-size:11px;
+  cursor:pointer;
+  opacity:0;
+  transition:opacity 2s;
+}
+#blessing{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:20;
+  background:#02091bd9;
+  backdrop-filter:blur(8px);
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.card{
+  width:100%;
+  max-width:380px;
+  text-align:center;
+  padding:42px 24px;
+  border:1px solid #e5c77c;
+  border-radius:18px;
+  background:linear-gradient(145deg,#18345b,#07152e);
+  box-shadow:0 0 45px #e7b95140;
+  animation:appear .6s ease;
+}
+.card .star{
+  font-size:48px;
+  color:#ffdb82;
+  margin-bottom:18px;
+  text-shadow:0 0 25px #ffca52;
+}
+.card h2{
+  font-weight:normal;
+  color:#ffe4a0;
+  letter-spacing:3px;
+  margin-bottom:20px;
+}
+.card p{
+  font-size:15px;
+  line-height:2.2;
+  color:#e6e9f1;
+  white-space:pre-line;
+}
+.close{
+  margin-top:27px;
+  padding:11px 28px;
+  background:transparent;
+  border:1px solid #d7b66d;
+  color:#ffe6aa;
+  border-radius:30px;
+  cursor:pointer;
+}
+#message{
+  position:absolute;
+  top:25%;
+  width:100%;
+  text-align:center;
+  z-index:8;
+  pointer-events:none;
+  color:#ffe9ae;
+  font-size:clamp(18px,4vw,27px);
+  letter-spacing:4px;
+  text-shadow:0 0 20px #ffc75b;
+  opacity:0;
+  transition:opacity 1s;
+}
+@keyframes fade{to{opacity:1}}
+@keyframes appear{
+  from{opacity:0;transform:translateY(20px) scale(.92)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Merry Christmas</h1>
+  <p>✧ CHRISTMAS STARRY NIGHT ✧</p>
+</div>
+<div id="message">🎅 Santa Claus is coming! 🎄</div>
+<div id="hint">
+  🎄 CLICK THE TREE TO INVITE SANTA 🎁<br>
+  ⭐ CLICK THE STAR FOR A CHRISTMAS WISH ⭐
+</div>
+<div id="footer">✦ MAY YOUR DREAMS COME TRUE ✦</div>
+<button id="replay">↻ REPLAY INTRO</button>
+<div id="blessing">
+  <div class="card">
+    <div class="star">✦</div>
+    <h2>Merry Christmas</h2>
+    <p id="blessingText"></p>
+    <button class="close" onclick="closeBlessing()">CLOSE ✧</button>
+  </div>
+</div>
+<script type="module">
+import * as THREE from
+'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+// ====================================
+// 1. BLUE STAR NIGHT
+// ====================================
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x030d27);
+scene.fog=new THREE.FogExp2(0x06152e,.012);
+const camera=new THREE.PerspectiveCamera(
+  42,innerWidth/innerHeight,.1,100
+);
+camera.position.set(0,4.4,16);
+camera.lookAt(0,3.5,0);
+const renderer=new THREE.WebGLRenderer({
+  antialias:true,
+  alpha:false
+});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.25;
+document.body.appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0x8baedc,1.1));
+const moon=new THREE.DirectionalLight(0xb6d7ff,2.5);
+moon.position.set(-5,9,7);
+scene.add(moon);
+const warm=new THREE.PointLight(0xffc76b,45,18);
+warm.position.set(3,6,4);
+scene.add(warm);
+// ====================================
+// 2. STAR FIELD
+// ====================================
+const stars=[];
+const starGeometry=new THREE.BufferGeometry();
+const starPositions=new Float32Array(1800*3);
+for(let i=0;i<1800;i++){
+  starPositions[i*3]=(Math.random()-.5)*45;
+  starPositions[i*3+1]=Math.random()*24-3;
+  starPositions[i*3+2]=-5-Math.random()*25;
+}
+starGeometry.setAttribute(
+  'position',
+  new THREE.BufferAttribute(starPositions,3)
+);
+const starField=new THREE.Points(
+  starGeometry,
+  new THREE.PointsMaterial({
+    color:0xd9eaff,
+    size:.045,
+    transparent:true,
+    opacity:.9
+  })
+);
+scene.add(starField);
+for(let i=0;i<35;i++){
+  const s=new THREE.Mesh(
+    new THREE.SphereGeometry(.035+Math.random()*.035,8,8),
+    new THREE.MeshBasicMaterial({color:0xffe9b0})
+  );
+  s.position.set(
+    (Math.random()-.5)*28,
+    Math.random()*13,
+    -4-Math.random()*12
+  );
+  scene.add(s);
+  stars.push(s);
+}
+// ====================================
+// 3. SNOW
+// ====================================
+const snowCount=900;
+const snowPos=new Float32Array(snowCount*3);
+for(let i=0;i<snowCount;i++){
+  snowPos[i*3]=(Math.random()-.5)*24;
+  snowPos[i*3+1]=Math.random()*15;
+  snowPos[i*3+2]=(Math.random()-.5)*16;
+}
+const snowGeo=new THREE.BufferGeometry();
+snowGeo.setAttribute(
+  'position',
+  new THREE.BufferAttribute(snowPos,3)
+);
+const snow=new THREE.Points(
+  snowGeo,
+  new THREE.PointsMaterial({
+    color:0xffffff,
+    size:.05,
+    transparent:true,
+    opacity:.8
+  })
+);
+scene.add(snow);
+// ====================================
+// 4. CHRISTMAS TREE
+// ====================================
+const tree=new THREE.Group();
+scene.add(tree);
+const layers=[];
+const ornaments=[];
+const bulbs=[];
+const greens=[
+  0x103d29,0x194e32,0x235c39
+];
+const trunk=new THREE.Mesh(
+  new THREE.CylinderGeometry(.18,.25,2.1,12),
+  new THREE.MeshStandardMaterial({color:0x65402c})
+);
+trunk.position.y=1;
+tree.add(trunk);
+for(let i=0;i<7;i++){
+  const layer=new THREE.Group();
+  const radius=2.1-i*.27;
+  const material=new THREE.MeshStandardMaterial({
+    color:greens[i%3],
+    roughness:.9,
+    side:THREE.DoubleSide
+  });
+  const cone=new THREE.Mesh(
+    new THREE.ConeGeometry(radius,1.9,28,1),
+    material
+  );
+  cone.castShadow=true;
+  layer.add(cone);
+  for(let j=0;j<16;j++){
+    const a=j/16*Math.PI*2;
+    const branch=new THREE.Mesh(
+      new THREE.ConeGeometry(.13,.65,5),
+      material
+    );
+    branch.position.set(
+      Math.cos(a)*radius*.72,
+      -.35,
+      Math.sin(a)*radius*.72
+    );
+    branch.rotation.z=Math.cos(a)*.35;
+    branch.rotation.x=Math.sin(a)*.35;
+    layer.add(branch);
+  }
+  layer.position.y=.75+i*.76;
+  layer.scale.setScalar(.001);
+  tree.add(layer);
+  layers.push(layer);
+}
+// ====================================
+// 5. SPIRAL RIBBON
+// ====================================
+const ribbonPoints=[];
+for(let i=0;i<=800;i++){
+  const t=i/800;
+  const angle=t*Math.PI*2*5.5;
+  const radius=2.1*(1-t*.96);
+  ribbonPoints.push(new THREE.Vector3(
+    Math.cos(angle)*radius,
+    .3+t*5.4,
+    Math.sin(angle)*radius
+  ));
+}
+const curve=new THREE.CatmullRomCurve3(ribbonPoints);
+function createRibbon(color,tube){
+  const geo=new THREE.TubeGeometry(curve,800,tube,10,false);
+  geo.setDrawRange(0,0);
+  const mesh=new THREE.Mesh(
+    geo,
+    new THREE.MeshStandardMaterial({
+      color,
+      metalness:.8,
+      roughness:.22,
+      emissive:color,
+      emissiveIntensity:.3
+    })
+  );
+  tree.add(mesh);
+  return mesh;
+}
+const goldRibbon=createRibbon(0xe6bb58,.05);
+const redRibbon=createRibbon(0xb52b40,.027);
+// ====================================
+// 6. LIGHTS AND ORNAMENTS
+// ====================================
+const colors=[
+  0xffd45a,0xff5472,0x5ac8ff,
+  0x9cffb0,0xffffff
+];
+for(let i=0;i<95;i++){
+  const t=i/95;
+  const a=t*Math.PI*2*8;
+  const r=1.95*(1-t*.95);
+  const bulb=new THREE.Mesh(
+    new THREE.SphereGeometry(.045,10,10),
+    new THREE.MeshBasicMaterial({
+      color:colors[i%colors.length],
+      transparent:true,
+      opacity:0
+    })
+  );
+  bulb.position.set(
+    Math.cos(a)*r,
+    .4+t*5.2,
+    Math.sin(a)*r
+  );
+  tree.add(bulb);
+  bulbs.push(bulb);
+}
+for(let i=0;i<40;i++){
+  const y=.8+Math.random()*4.7;
+  const r=1.9*(1-(y-.8)/4.7);
+  const a=Math.random()*Math.PI*2;
+  const color=colors[i%colors.length];
+  const ball=new THREE.Mesh(
+    new THREE.SphereGeometry(.075,14,14),
+    new THREE.MeshStandardMaterial({
+      color,
+      metalness:.8,
+      roughness:.2,
+      emissive:color,
+      emissiveIntensity:.2,
+      transparent:true,
+      opacity:0
+    })
+  );
+  ball.position.set(
+    Math.cos(a)*r,
+    y,
+    Math.sin(a)*r
+  );
+  tree.add(ball);
+  ornaments.push(ball);
+}
+// ====================================
+// 7. GOLDEN STAR
+// ====================================
+const shape=new THREE.Shape();
+for(let i=0;i<10;i++){
+  const a=Math.PI/2+i*Math.PI/5;
+  const r=i%2===0?.48:.21;
+  if(i===0) shape.moveTo(Math.cos(a)*r,Math.sin(a)*r);
+  else shape.lineTo(Math.cos(a)*r,Math.sin(a)*r);
+}
+shape.closePath();
+const star=new THREE.Mesh(
+  new THREE.ExtrudeGeometry(shape,{
+    depth:.13,
+    bevelEnabled:true,
+    bevelSegments:3,
+    bevelSize:.035,
+    bevelThickness:.04
+  }),
+  new THREE.MeshStandardMaterial({
+    color:0xffd15c,
+    metalness:.85,
+    roughness:.2,
+    emissive:0xffae25,
+    emissiveIntensity:.7
+  })
+);
+star.position.y=6.2;
+star.scale.setScalar(.001);
+tree.add(star);
+const starGlow=new THREE.PointLight(0xffd05a,0,7);
+starGlow.position.set(0,6.5,0);
+tree.add(starGlow);
+// ====================================
+// 8. SNOW GROUND
+// ====================================
+const ground=new THREE.Mesh(
+  new THREE.CircleGeometry(3.2,64),
+  new THREE.MeshStandardMaterial({
+    color:0xdceaff,
+    roughness:.85
+  })
+);
+ground.rotation.x=-Math.PI/2;
+ground.position.y=-.12;
+scene.add(ground);
+// ====================================
+// 9. SANTA AND SLEIGH
+// ====================================
+const sleigh=new THREE.Group();
+scene.add(sleigh);
+// 整組水平翻轉：讓麋鹿與雪橇朝左飛行
+sleigh.scale.x=-1;
+const redMat=new THREE.MeshStandardMaterial({
+  color:0xc51f35,
+  metalness:.35,
+  roughness:.3
+});
+const goldMat=new THREE.MeshStandardMaterial({
+  color:0xf4c45d,
+  metalness:.75,
+  roughness:.23
+});
+const brownMat=new THREE.MeshStandardMaterial({
+  color:0x75401e,
+  roughness:.85
+});
+const whiteMat=new THREE.MeshStandardMaterial({
+  color:0xf4eee5,
+  roughness:.8
+});
+const blackMat=new THREE.MeshStandardMaterial({
+  color:0x211b19
+});
+function part(parent,geo,mat,x,y,z,sx=1,sy=1,sz=1){
+  const m=new THREE.Mesh(geo,mat);
+  m.position.set(x,y,z);
+  m.scale.set(sx,sy,sz);
+  parent.add(m);
+  return m;
+}
+// Sleigh seat and body
+part(sleigh,new THREE.BoxGeometry(1.8,.35,.85),
+  redMat,-1.0,.85,0);
+part(sleigh,new THREE.BoxGeometry(1.6,.12,.88),
+  goldMat,-1,.65,0);
+// Sleigh front curved golden runners
+for(let z of [-.38,.38]){
+  const points=[
+    new THREE.Vector3(-2,.25,z),
+    new THREE.Vector3(-1.8,.12,z),
+    new THREE.Vector3(-.9,.12,z),
+    new THREE.Vector3(-.2,.25,z),
+    new THREE.Vector3(.0,.55,z)
+  ];
+  const rail=new THREE.Mesh(
+    new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3(points),
+      40,.055,8,false
+    ),
+    goldMat
+  );
+  sleigh.add(rail);
+}
+// Santa's body
+part(sleigh,new THREE.SphereGeometry(.48,20,16),
+  redMat,-1.0,1.55,0,1,1.15,.85);
+// Santa's face
+const skinMat=new THREE.MeshStandardMaterial({color:0xf1bd91});
+part(sleigh,new THREE.SphereGeometry(.29,20,16),
+  skinMat,-.65,2.12,0);
+// White beard
+part(sleigh,new THREE.SphereGeometry(.29,16,12),
+  whiteMat,-.62,1.92,.12,1,.75,.8);
+// Eyes
+for(let z of [-.13,.13]){
+  part(sleigh,new THREE.SphereGeometry(.035,8,8),
+    blackMat,-.42,2.15,z);
+}
+// Nose
+part(sleigh,new THREE.SphereGeometry(.07,12,12),
+  skinMat,-.34,2.02,0);
+// Santa hat
+part(sleigh,new THREE.ConeGeometry(.3,.65,16),
+  redMat,-.7,2.62,0);
+part(sleigh,new THREE.SphereGeometry(.1,12,12),
+  whiteMat,-.7,2.96,0);
+part(sleigh,new THREE.TorusGeometry(.28,.065,8,20),
+  whiteMat,-.7,2.42,0);
+// Santa arms
+for(let z of [-.43,.43]){
+  const arm=part(sleigh,
+    new THREE.CapsuleGeometry(.12,.42,4,8),
+    redMat,-.3,1.55,z);
+  arm.rotation.z=-.5;
+}
+// Santa's gift sack
+part(sleigh,new THREE.SphereGeometry(.48,18,14),
+  new THREE.MeshStandardMaterial({color:0x9c202e}),
+  -1.8,1.35,-.05,1,1.2,1);
+// Sack tie
+part(sleigh,new THREE.TorusGeometry(.18,.045,8,16),
+  goldMat,-1.8,1.82,0);
+// ====================================
+// 10. THREE REINDEER
+// ====================================
+const deerGroups=[];
+function createDeer(){
+  const deer=new THREE.Group();
+  // Body
+  part(deer,new THREE.SphereGeometry(.36,16,12),
+    brownMat,0,0,0,1.45,.9,.8);
+  // Neck
+  const neck=part(deer,
+    new THREE.CylinderGeometry(.14,.2,.6,12),
+    brownMat,.38,.35,0);
+  neck.rotation.z=-.4;
+  // Head
+  part(deer,new THREE.SphereGeometry(.23,16,12),
+    brownMat,.58,.67,0,.9,1.15,.85);
+  // Muzzle
+  part(deer,new THREE.SphereGeometry(.11,12,10),
+    skinMat,.77,.57,0,1,.8,1);
+  // Nose
+  part(deer,new THREE.SphereGeometry(.065,12,10),
+    new THREE.MeshStandardMaterial({color:0x6e1823}),
+    .86,.59,0);
+  // Eyes
+  for(let z of [-.17,.17]){
+    part(deer,new THREE.SphereGeometry(.035,8,8),
+      blackMat,.65,.73,z);
+  }
+  // Antlers
+  for(let z of [-.12,.12]){
+    const antler=new THREE.Group();
+    const base=part(antler,
+      new THREE.CylinderGeometry(.025,.04,.42,6),
+      goldMat,0,.2,0);
+    base.rotation.z=-.3;
+    for(let j=0;j<2;j++){
+      const branch=part(antler,
+        new THREE.CylinderGeometry(.018,.028,.23,6),
+        goldMat,.07,.3+j*.13,0);
+      branch.rotation.z=-.9;
+    }
+    antler.position.set(.48,.88,z);
+    deer.add(antler);
+  }
+  // Four legs
+  for(let x of [-.2,.25]){
+    for(let z of [-.19,.19]){
+      const leg=part(deer,
+        new THREE.CylinderGeometry(.045,.055,.48,8),
+        brownMat,x,-.33,z);
+      leg.rotation.z=(x>0?-.12:.12);
+    }
+  }
+  // Reins connector
+  const rein=part(deer,
+    new THREE.CylinderGeometry(.018,.018,.9,6),
+    goldMat,-.45,.2,0);
+  rein.rotation.z=Math.PI/2;
+  deerGroups.push(deer);
+  return deer;
+}
+// Three reindeer flying in a row
+for(let i=0;i<3;i++){
+  const deer=createDeer();
+  deer.position.set(
+    1.3+i*.95,
+    .2,
+    (i-1)*.35
+  );
+  sleigh.add(deer);
+}
+// Red nose glow
+const noseLight=new THREE.PointLight(0xff3547,3,2);
+noseLight.position.set(2.2,.8,0);
+sleigh.add(noseLight);
+// Gift cargo inside sleigh
+const cargoColors=[
+  0xe13a4b,0x238354,0xe9bc50,0x668ed7,0x9d68c2
+];
+for(let i=0;i<10;i++){
+  const c=cargoColors[i%cargoColors.length];
+  const mat=new THREE.MeshStandardMaterial({
+    color:c,
+    roughness:.4
+  });
+  const gift=part(sleigh,
+    new THREE.BoxGeometry(.32,.32,.32),
+    mat,
+    -1.9+Math.random()*.8,
+    1.8+Math.random()*.65,
+    (Math.random()-.5)*.55
+  );
+  gift.rotation.y=Math.random();
+  part(sleigh,new THREE.BoxGeometry(.06,.34,.34),
+    goldMat,gift.position.x,gift.position.y,gift.position.z);
+}
+sleigh.visible=false;
+// ====================================
+// 11. FALLING GIFTS
+// ====================================
+const fallingGifts=[];
+function makeFallingGift(){
+  const gift=new THREE.Group();
+  const color=cargoColors[
+    Math.floor(Math.random()*cargoColors.length)
+  ];
+  const mat=new THREE.MeshStandardMaterial({
+    color,
+    metalness:.2,
+    roughness:.35
+  });
+  part(gift,new THREE.BoxGeometry(.42,.38,.42),mat,0,0,0);
+  part(gift,new THREE.BoxGeometry(.09,.4,.44),goldMat,0,0,0);
+  part(gift,new THREE.BoxGeometry(.44,.4,.09),goldMat,0,0,0);
+  part(gift,new THREE.BoxGeometry(.47,.08,.47),goldMat,0,.21,0);
+  for(let i=0;i<2;i++){
+    const bow=part(gift,
+      new THREE.TorusGeometry(.09,.025,8,14),
+      goldMat,
+      i===0?-.09:.09,.3,0
+    );
+    bow.scale.set(1,.7,1);
+  }
+  gift.position.set(
+    (Math.random()-.5)*12,
+    10+Math.random()*5,
+    (Math.random()-.5)*5
+  );
+  gift.userData={
+    velocity:0,
+    rotation:Math.random()*.04-.02,
+    spin:Math.random()*.05
+  };
+  scene.add(gift);
+  fallingGifts.push(gift);
+}
+function updateFallingGifts(){
+  for(let i=fallingGifts.length-1;i>=0;i--){
+    const g=fallingGifts[i];
+    const d=g.userData;
+    d.velocity-=.008;
+    g.position.y+=d.velocity;
+    g.rotation.y+=d.spin;
+    g.rotation.z+=d.rotation;
+    if(g.position.y<-.5){
+      scene.remove(g);
+      fallingGifts.splice(i,1);
+    }
+  }
+}
+// ====================================
+// 12. SANTA FLYBY
+// ====================================
+let santaActive=false;
+let santaStart=0;
+let giftTimer=0;
+let santaHasArrived=false;
+function launchSanta(){
+  if(!introFinished||santaActive) return;
+  santaActive=true;
+  santaHasArrived=true;
+  santaStart=performance.now();
+  giftTimer=0;
+  sleigh.visible=true;
+  // 從右側進場
+  sleigh.position.set(19,6.3,-1);
+  sleigh.rotation.set(0,0,0);
+  document.getElementById('message').style.opacity=1;
+  setTimeout(()=>{
+    document.getElementById('message').style.opacity=0;
+  },3500);
+}
+function updateSanta(now){
+  if(!santaActive) return;
+  const elapsed=(now-santaStart)/1000;
+  const duration=9;
+  const p=Math.min(elapsed/duration,1);
+  // 從右側飛向左側
+  sleigh.position.x=19-p*39;
+  // 上下飛行起伏
+  sleigh.position.y=6.3+Math.sin(elapsed*2.3)*.32;
+  // 飛行傾斜
+  sleigh.rotation.z=Math.sin(elapsed*1.5)*.035;
+  // 麋鹿奔跑動態
+  deerGroups.forEach((deer,i)=>{
+    deer.rotation.z=Math.sin(elapsed*9+i)*.07;
+  });
+  // 飛行途中持續灑落禮物
+  giftTimer++;
+  if(giftTimer%11===0&&fallingGifts.length<70){
+    makeFallingGift();
+  }
+  if(p>=1){
+    santaActive=false;
+    sleigh.visible=false;
+  }
+}
+// ====================================
+// 13. EXPLOSION PARTICLES
+// ====================================
+const explosions=[];
+function explosion(pos){
+  for(let i=0;i<80;i++){
+    const m=new THREE.Mesh(
+      new THREE.SphereGeometry(.035,8,8),
+      new THREE.MeshBasicMaterial({
+        color:colors[i%colors.length],
+        transparent:true
+      })
+    );
+    m.position.copy(pos);
+    scene.add(m);
+    const velocity=new THREE.Vector3(
+      Math.random()*2-1,
+      Math.random()*2-1,
+      Math.random()*2-1
+    ).normalize().multiplyScalar(.08+Math.random()*.1);
+    explosions.push({
+      mesh:m,
+      velocity,
+      life:1
+    });
+  }
+}
+function updateExplosions(){
+  for(let i=explosions.length-1;i>=0;i--){
+    const p=explosions[i];
+    p.mesh.position.add(p.velocity);
+    p.velocity.multiplyScalar(.97);
+    p.life-=.015;
+    p.mesh.material.opacity=Math.max(0,p.life);
+    if(p.life<=0){
+      scene.remove(p.mesh);
+      p.mesh.geometry.dispose();
+      p.mesh.material.dispose();
+      explosions.splice(i,1);
+    }
+  }
+}
+// ====================================
+// 14. CHRISTMAS BLESSINGS
+// ====================================
+const blessings=[
+  "願你的每一天都充滿陽光與希望，\n願所有美好的事情都悄悄發生。❤️",
+  "願你在新的一年，\n遇見值得的人，走向喜歡的生活。✨",
+  "May your heart be filled with love,\njoy and endless happiness. 🎄",
+  "願所有等待都有答案，\n所有努力都不被辜負。🌟",
+  "願你永遠保有善良與勇氣，\n也永遠有人珍惜你的溫柔。💗",
+  "Christmas is a season of love.\nMay all your wishes come true! 🎁"
+];
+let blessingIndex=0;
+function showBlessing(){
+  document.getElementById('blessingText').textContent=
+    blessings[blessingIndex%blessings.length];
+  blessingIndex++;
+  document.getElementById('blessing').style.display='flex';
+  const pos=new THREE.Vector3();
+  star.getWorldPosition(pos);
+  explosion(pos);
+  starGlow.intensity=120;
+  setTimeout(()=>starGlow.intensity=50,900);
+}
+window.closeBlessing=()=>{
+  document.getElementById('blessing').style.display='none';
+};
+// ====================================
+// 15. CINEMATIC TREE INTRO
+// ====================================
+const INTRO_DURATION=9;
+let introStart=performance.now();
+let introFinished=false;
+function clamp(v){
+  return Math.max(0,Math.min(1,v));
+}
+function ease(v){
+  return 1-Math.pow(1-v,3);
+}
+function updateIntro(now){
+  if(introFinished)return;
+  const p=clamp((now-introStart)/1000/INTRO_DURATION);
+  const ribbonP=ease(clamp((p-.03)/.78));
+  goldRibbon.geometry.setDrawRange(
+    0,Math.floor(800*ribbonP)
+  );
+  redRibbon.geometry.setDrawRange(
+    0,Math.floor(800*ribbonP)
+  );
+  layers.forEach((layer,i)=>{
+    const v=ease(clamp((p-(.12+i*.085))/.24));
+    layer.scale.setScalar(v);
+  });
+  ornaments.forEach((item,i)=>{
+    const v=clamp((p-.35-i*.006)/.25);
+    item.material.opacity=v;
+  });
+  bulbs.forEach((item,i)=>{
+    item.material.opacity=clamp((p-.4-i*.002)/.25);
+  });
+  star.scale.setScalar(ease(clamp((p-.76)/.22)));
+  starGlow.intensity=50*clamp((p-.76)/.22);
+  tree.rotation.y=p*.5;
+  if(p>=1){
+    introFinished=true;
+    document.getElementById('hint').style.opacity=1;
+    document.getElementById('footer').style.opacity=1;
+    document.getElementById('replay').style.opacity=1;
+  }
+}
+// ====================================
+// 16. INTERACTION
+// ====================================
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2();
+let isDragging=false;
+let pointerStart=null;
+let previousX=0;
+let rotationVelocity=.003;
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(!introFinished)return;
+  isDragging=true;
+  pointerStart={x:e.clientX,y:e.clientY};
+  previousX=e.clientX;
+});
+window.addEventListener('pointerup',e=>{
+  if(!isDragging||!pointerStart)return;
+  const dx=e.clientX-pointerStart.x;
+  const dy=e.clientY-pointerStart.y;
+  isDragging=false;
+  if(Math.hypot(dx,dy)<8){
+    handleClick(e);
+  }
+  pointerStart=null;
+});
+window.addEventListener('pointermove',e=>{
+  if(!isDragging||!pointerStart)return;
+  const delta=e.clientX-previousX;
+  tree.rotation.y+=delta*.008;
+  rotationVelocity=delta*.0003;
+  previousX=e.clientX;
+});
+function handleClick(e){
+  pointer.set(
+    e.clientX/innerWidth*2-1,
+    -(e.clientY/innerHeight)*2+1
+  );
+  raycaster.setFromCamera(pointer,camera);
+  // Star first
+  if(raycaster.intersectObject(star,true).length){
+    showBlessing();
+    return;
+  }
+  // Tree click launches Santa
+  if(raycaster.intersectObject(tree,true).length){
+    launchSanta();
+  }
+}
+// ====================================
+// 17. REPLAY INTRO
+// ====================================
+function replay(){
+  introFinished=false;
+  santaActive=false;
+  sleigh.visible=false;
+  tree.rotation.y=0;
+  introStart=performance.now();
+  goldRibbon.geometry.setDrawRange(0,0);
+  redRibbon.geometry.setDrawRange(0,0);
+  layers.forEach(l=>l.scale.setScalar(.001));
+  ornaments.forEach(o=>o.material.opacity=0);
+  bulbs.forEach(b=>b.material.opacity=0);
+  star.scale.setScalar(.001);
+  starGlow.intensity=0;
+  fallingGifts.forEach(g=>scene.remove(g));
+  fallingGifts.length=0;
+  document.getElementById('hint').style.opacity=0;
+  document.getElementById('footer').style.opacity=0;
+  document.getElementById('replay').style.opacity=0;
+}
+document.getElementById('replay').addEventListener('click',replay);
+// ====================================
+// 18. MAIN ANIMATION
+// ====================================
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  const now=performance.now();
+  if(!introFinished){
+    updateIntro(now);
+  }else if(!isDragging){
+    tree.rotation.y+=.003+rotationVelocity;
+    rotationVelocity*=.96;
+  }
+  // Star twinkle
+  if(introFinished){
+    star.rotation.y=Math.sin(t*.8)*.2;
+    star.rotation.z=Math.sin(t)*.06;
+  }
+  // Star field
+  stars.forEach((s,i)=>{
+    const v=.55+.45*Math.sin(t*2+i);
+    s.scale.setScalar(v);
+  });
+  // Snow
+  const p=snow.geometry.attributes.position.array;
+  for(let i=0;i<snowCount;i++){
+    p[i*3+1]-=.018;
+    p[i*3]+=Math.sin(t+i)*.0015;
+    if(p[i*3+1]<0)p[i*3+1]=15;
+  }
+  snow.geometry.attributes.position.needsUpdate=true;
+  // Santa
+  updateSanta(now);
+  // Gifts
+  updateFallingGifts();
+  // Particles
+  updateExplosions();
+  renderer.render(scene,camera);
+}
+replay();
+animate();
+// ====================================
+// 19. RESPONSIVE
+// ====================================
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.position.z=innerWidth<600?18:16;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
